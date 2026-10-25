@@ -1,0 +1,9 @@
+.venv/
+.logs/
+.tools/
+artifacts/
+__pycache__/
+*.pyc
+node_modules/
+webapp/data/
+samples/
