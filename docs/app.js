@@ -10,6 +10,7 @@ const state = {
   custom: "",
   estimate: null,
   generating: false,
+  autoStart: false,
   result: null,
   fontFace: null,
   fontUrl: null,
@@ -34,6 +35,7 @@ const progressBar = $("progress-bar");
 const progressMessage = $("progress-message");
 const progressEta = $("progress-eta");
 const resultBody = $("result-body");
+const allAxesBtn = $("all-axes-btn");
 const specimen = $("specimen");
 const slidersEl = $("sliders");
 const settingsCard = $("settings-card");
@@ -190,6 +192,16 @@ function buildAxisButtons() {
   syncAxisButtons();
 }
 
+// One click: every axis the model supports, in a single file, and go.
+allAxesBtn.addEventListener("click", () => {
+  if (!state.info || state.generating) return;
+  state.axes = new Set(Object.keys(state.info.axes));
+  state.deltaLevel = 1;
+  state.autoStart = true;
+  syncAxisButtons();
+  scheduleEstimate();
+});
+
 function toggleAxis(tag) {
   if (state.axes.has(tag)) {
     if (state.axes.size === 1) return;
@@ -212,6 +224,7 @@ function syncAxisButtons() {
     button.disabled = !enabled;
     button.classList.toggle("active", enabled && level === state.deltaLevel);
   });
+  allAxesBtn.disabled = !state.info || state.generating;
 }
 
 $("delta-level").addEventListener("click", (event) => {
@@ -253,6 +266,7 @@ function scheduleEstimate() {
 async function runEstimate() {
   if (!state.info) return;
   if (state.preset === "custom" && !state.custom.trim()) {
+    state.autoStart = false;
     estimateText.textContent = "הזינו טווח Unicode, למשל 0x5D0-0x5EA";
     generateBtn.disabled = true;
     return;
@@ -266,6 +280,7 @@ async function runEstimate() {
     });
     state.estimate = value;
     if (!value.glyphs) {
+      state.autoStart = false;
       estimateText.textContent = "לא נמצאו תווים מתאימים בטווח הזה בפונט";
       generateBtn.disabled = true;
       return;
@@ -278,7 +293,12 @@ async function runEstimate() {
     const timeNote = seconds > 2 ? ` · כ־${Math.round(seconds)} שנ׳` : "";
     estimateText.textContent = `${nf.format(value.glyphs)} תווים · ${nf.format(value.tuples)} וריאציות${timeNote}${compositeNote}`;
     generateBtn.disabled = false;
+    if (state.autoStart) {
+      state.autoStart = false;
+      startGeneration();
+    }
   } catch (error) {
+    state.autoStart = false;
     estimateText.textContent = error.message;
     generateBtn.disabled = true;
   }
@@ -294,6 +314,7 @@ async function startGeneration() {
   state.generating = true;
   state.startedAt = Date.now();
   generateBtn.disabled = true;
+  syncAxisButtons();
   progressWrap.classList.remove("hidden");
   progressBar.style.width = "2%";
   progressMessage.textContent = state.modelReady ? "מתחיל לחשב…" : "טוען את המודל…";
@@ -328,6 +349,7 @@ async function startGeneration() {
     }
   } finally {
     state.generating = false;
+    syncAxisButtons();
   }
 }
 

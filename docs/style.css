@@ -309,6 +309,37 @@ body {
 .axis-btn .axis-label { font-weight: 600; font-size: 14px; }
 .axis-btn .axis-hint { color: var(--muted); font-size: 12px; }
 
+.quick-all {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: start;
+  font-family: inherit;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(124, 92, 255, 0.55);
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.14), rgba(124, 92, 255, 0.04));
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.16s ease;
+}
+.quick-all:hover:not(:disabled) {
+  border-style: solid;
+  border-color: rgba(124, 92, 255, 0.9);
+  background: linear-gradient(180deg, rgba(124, 92, 255, 0.22), rgba(124, 92, 255, 0.08));
+}
+.quick-all:disabled { opacity: 0.5; cursor: not-allowed; }
+.quick-all-title { font-weight: 700; font-size: 14px; }
+.quick-all-sub {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  direction: ltr;
+  text-align: start;
+}
+
 .segmented {
   display: inline-flex;
   padding: 4px;
