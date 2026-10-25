@@ -14,6 +14,7 @@ import {
 import { generateVariableFont } from "./engine/pipeline.js";
 import { inspectFont } from "./engine/inspect.js";
 import { parseRangeSpec } from "./engine/unicode.js";
+import { fetchWithProgress } from "./engine/fetch.js";
 
 let modelPromise = null;
 let config = null;
@@ -26,26 +27,6 @@ const post = (payload, transfer) => {
   const id = payload && payload.id !== undefined ? payload.id : currentId;
   self.postMessage({ ...payload, id }, transfer || []);
 };
-
-async function fetchWithProgress(url, onProgress) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`טעינת המודל נכשלה (HTTP ${response.status})`);
-  const total = Number(response.headers.get("content-length") || 0);
-  if (!response.body || !total) {
-    return new Uint8Array(await response.arrayBuffer());
-  }
-  const reader = response.body.getReader();
-  const bytes = new Uint8Array(total);
-  let loaded = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    bytes.set(value, loaded);
-    loaded += value.length;
-    onProgress(loaded / total);
-  }
-  return bytes;
-}
 
 function loadModel() {
   if (modelPromise) return modelPromise;
